@@ -14,8 +14,8 @@
 ;  You should have received a copy of the GNU General Public License
 ;  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-include include/bios.inc
-include include/kernel.inc
+#include include/bios.inc
+#include include/kernel.inc
 
 
             ; Executable program header
@@ -30,10 +30,10 @@ start:      br    skipspc
 
             ; Build information
 
-            db    19+80h                 ; month
-            db    5                     ; day
-            dw    2022                  ; year
-            dw    1                     ; build
+            db    9+80h                 ; month
+            db    18                     ; day
+            dw    2024                  ; year
+            dw    2                     ; build
 
             db    'See github.com/dmadole/Elfos-date for more info',0
 
@@ -44,6 +44,11 @@ skipspc:    lda   ra                    ; skip until non-space or end of line
             lbz   skipspc
 
             dec   ra                    ; backup to non-space character
+	
+	    ldn   ra
+	    smi   '?'
+	    lbz    prompt
+fmprompt:	
 
             ldi   low datebuf           ; get pointer to date buffer
             plo   rb
@@ -107,14 +112,19 @@ skpyear:    inc   rb
             sm                          ;  skip over separator
             inc   rc
             lbz   datenxt
-
+	;;  if we are at seconds this is OK because seconds are optional
+	    ldi 0
+	    str rb  		; zero seconds maybe?
+	    glo rc
+	    smi low secondfmt+1
+	    lbz datechk
 
             ; Error messages for the two things that can go wrong while
             ; parsing dates -- the wrong format or not a valid date.
 
 datefmt:    sep   scall                 ; if the format is wrong
             dw    o_inmsg
-            db    'ERROR: Use date format "MM/DD/YY HH:MM:SS"',13,10,0
+            db    'ERROR: Use date format "MM/DD/YYYY HH:MM:SS"',13,10,0
             sep   sret
 
 datebad:    sep   scall                 ; if an element if out of range
@@ -138,7 +148,7 @@ dateinp:    dw    1,12                  ; month
             dw    0,23                  ; hour
             db    ':'
             dw    0,59                  ; minute
-            db    ':'
+secondfmt:  db    ':'		;
             dw    0,59                  ; second
             db    0
 
@@ -226,6 +236,34 @@ cpyloop:    lda   rb
 
             sep   sret
 
+	;; Prompt if we had a ?
+prompt:	   sep     scall
+	   dw	   o_inmsg
+	   db	   'Enter date/time (MM/DD/YYYY HH:MM:SS): ',0
+	;; 	   mov rf, buffer
+	   ldi     high buffer
+	   phi     rf
+	   ldi     low buffer
+	   plo     rf
+	;; 	   mov rc, 23
+	   ldi     23
+	   plo     rc
+	   ldi     0
+	   phi     rc
+           sep     scall
+	   dw      o_inputl
+   	   lbdf    o_wrmboot   	; quit
+	   sep     scall
+	   dw      o_inmsg
+	   db      10,13,0
+	;; mov rf, buffer	
+	   ldi     high buffer
+	   phi     ra
+	   ldi     low buffer
+	   plo     ra
+	   lbr fmprompt
+	
+	
 
             ; If no argument was supplied on the command line, then get the
             ; time from the RTC and print it, if present.
