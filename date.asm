@@ -112,7 +112,12 @@ skpyear:    inc   rb
             sm                          ;  skip over separator
             inc   rc
             lbz   datenxt
-
+	;;  if we are at seconds this is OK because seconds are optional
+	    ldi 0
+	    str rb  		; zero seconds maybe?
+	    glo rc
+	    smi low secondfmt+1
+	    lbz datechk
 
             ; Error messages for the two things that can go wrong while
             ; parsing dates -- the wrong format or not a valid date.
@@ -143,7 +148,7 @@ dateinp:    dw    1,12                  ; month
             dw    0,23                  ; hour
             db    ':'
             dw    0,59                  ; minute
-            db    ':'
+secondfmt:  db    ':'		;
             dw    0,59                  ; second
             db    0
 
