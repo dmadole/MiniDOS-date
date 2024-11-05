@@ -1,6 +1,6 @@
-# Date
+# MiniDOS-date
 
-This is a from-scratch replacement date program for Elf/OS that offers the
+This is a from-scratch replacement date program for Mini/DOS that offers the
 following improvements:
 
 * Outputs date elements with leading zeroes for the two-digit elements of the date.
