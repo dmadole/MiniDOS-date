@@ -30,12 +30,12 @@ start:      br    skipspc
 
             ; Build information
 
-            db    19+80h                 ; month
-            db    5                     ; day
-            dw    2022                  ; year
-            dw    1                     ; build
+            db    5+80h                 ; month
+            db    11                    ; day
+            dw    2024                  ; year
+            dw    2                     ; build
 
-            db    'See github.com/dmadole/Elfos-date for more info',0
+            db    'See github.com/dmadole/MiniDOS-date for more info',0
 
 
 skipspc:    lda   ra                    ; skip until non-space or end of line
